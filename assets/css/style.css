@@ -72,7 +72,7 @@
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);   /* calm deceleration, no bounce */
     --ease-ui:  cubic-bezier(0.4, 0, 0.2, 1);
   }
-  @media (min-width: 430px){ :root{ --gutter: 24px; } }
+  @media (min-width:430px){ :root{ --gutter: 24px; } }
 
   *,*::before,*::after{ box-sizing:border-box; }
   html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
@@ -125,8 +125,7 @@
   /* ============ Header ============ */
   header.site{
     position:sticky; top:0; z-index:40;
-    background:rgba(246,241,232,0.92);
-    backdrop-filter:saturate(140%) blur(6px);
+    background:rgba(246,241,232,0.96);
     border-bottom:1px solid var(--stone);
   }
   .header-row{
@@ -190,7 +189,7 @@
   .mobile-menu .social-row{ display:flex; gap:16px; padding:16px 4px 4px; font-size:var(--fs-cap); color:var(--slate); }
 
   nav.desktop-nav{ display:none; }
-  @media (min-width: 860px){
+  @media (min-width:860px){
     nav.desktop-nav{ display:flex; gap:30px; align-items:center; }
     nav.desktop-nav a{
       text-decoration:none; color:var(--ink); font-size:0.92rem; font-weight:600;
@@ -299,7 +298,7 @@
   .chip{
     border:1px solid var(--stone); background:transparent; border-radius:999px;
     padding:9px 16px; font-size:var(--fs-cap); font-weight:600; color:var(--slate); cursor:pointer;
-    min-height:40px;
+    min-height:44px; display:inline-flex; align-items:center;
   }
   .chip[aria-pressed="true"]{ background:var(--navy); color:var(--white); border-color:var(--navy); }
   .place-grid{ display:grid; gap:16px; }
@@ -336,7 +335,7 @@
 
   /* ============ Milestone ============ */
   .milestone-wrap{ display:flex; gap:28px; align-items:flex-start; }
-  .milestone-year{ font-family:var(--display); font-weight:700; font-size:3.4rem; color:var(--gold); line-height:1; flex:none; font-variant-numeric:tabular-nums; }
+  .milestone-year{ font-family:var(--display); font-weight:700; font-size:3.4rem; color:var(--bronze); line-height:1; flex:none; font-variant-numeric:tabular-nums; }
   .milestone-copy p{ font-size:var(--fs-bodyl); margin-top:8px; }
 
   /* ============ News ============ */
@@ -419,7 +418,7 @@
     display:grid; align-content:center; justify-items:center;
     gap:clamp(1.25rem,4vw,2rem); padding:var(--gutter);
     background:var(--navy);
-    opacity:1; transition:opacity 380ms ease;
+    opacity:1; transition:opacity 170ms ease;
   }
   .preloader[hidden]{ display:none; }
   .preloader.is-done{ opacity:0; pointer-events:none; }
@@ -430,20 +429,20 @@
   .preloader__portrait, .sketch-portrait{ position:absolute; inset:0; width:100%; height:100%; }
   .preloader__portrait{
     object-fit:cover; opacity:0; transform:scale(1.035);
-    transition:opacity 820ms ease, transform 820ms ease;
+    transition:opacity 370ms ease, transform 370ms ease;
   }
   .preloader.is-resolving .preloader__portrait{ opacity:1; transform:scale(1); }
   .sketch-portrait path{
     stroke:var(--preloader-ink); stroke-linecap:round;
     stroke-width:calc(var(--w) * 1px); stroke-opacity:var(--o);
     stroke-dasharray:1; stroke-dashoffset:1;
-    transition:stroke-dashoffset 420ms ease;
-    transition-delay:calc(var(--i) * 5.5ms);
+    transition:stroke-dashoffset 190ms ease;
+    transition-delay:calc(var(--i) * 2.5ms);
   }
   .preloader.is-drawing .sketch-portrait path{ stroke-dashoffset:0; }
   .preloader.is-resolving .sketch-portrait{
     opacity:0; filter:blur(1.5px);
-    transition:opacity 640ms ease, filter 640ms ease;
+    transition:opacity 290ms ease, filter 290ms ease;
   }
   .preloader__mark{ display:grid; gap:0.5em; text-align:center; }
   .preloader__name{
@@ -517,7 +516,7 @@
   .principle-grid{ display:grid; gap:1px; background:var(--stone); border:1px solid var(--stone); margin-top:14px; }
   @media (min-width:700px){ .principle-grid{ grid-template-columns:repeat(2,1fr); } }
   .principle-card{ background:var(--ivory); padding:24px; }
-  .principle-num{ font-family:var(--display); font-weight:700; color:var(--gold); font-size:1.6rem; }
+  .principle-num{ font-family:var(--display); font-weight:700; color:var(--bronze); font-size:1.6rem; }
   .principle-card h4{ font-size:1.15rem; margin:8px 0 6px; font-family:var(--display); font-weight:600; }
   .principle-card p{ font-size:var(--fs-ui); color:var(--ink); }
 
@@ -651,7 +650,7 @@
   .kit-tabs input{ position:absolute; opacity:0; pointer-events:none; }
   .kit-tabs label{
     border:1px solid var(--stone); padding:9px 18px; font-size:var(--fs-cap); font-weight:700; color:var(--slate);
-    cursor:pointer; border-radius:999px; min-height:40px; display:inline-flex; align-items:center;
+    cursor:pointer; border-radius:999px; min-height:44px; display:inline-flex; align-items:center;
   }
   .kit-panels{ margin-top:20px; border:1px solid var(--stone); padding:26px; background:var(--ivory); }
   .kit-panel{ display:none; font-size:var(--fs-bodyl); line-height:1.7; }
@@ -687,7 +686,7 @@
 
   /* ---------- 404 ---------- */
   .error-hero{ text-align:center; padding-block:100px 60px; }
-  .error-code{ font-family:var(--display); font-weight:700; font-size:clamp(4rem,18vw,8rem); color:var(--gold); line-height:1; }
+  .error-code{ font-family:var(--display); font-weight:700; font-size:clamp(4rem,18vw,8rem); color:var(--bronze); line-height:1; }
   .error-hero h1{ font-size:var(--fs-h2); color:var(--navy); margin-top:6px; }
   .error-hero p{ font-size:var(--fs-lead); color:var(--ink); max-width:56ch; margin:16px auto 0; }
   .error-actions{ display:flex; flex-wrap:wrap; justify-content:center; gap:14px; margin-top:30px; }
@@ -703,7 +702,7 @@
     position:fixed; left:0; right:0; bottom:0; z-index:39;
     display:flex; gap:10px; padding:10px var(--gutter);
     padding-bottom:calc(10px + env(safe-area-inset-bottom));
-    background:rgba(16,42,67,0.94); backdrop-filter:saturate(140%) blur(8px);
+    background:rgba(16,42,67,0.97);
     border-top:1px solid rgba(246,241,232,0.14);
     transform:translateY(0); transition:transform 280ms var(--ease-ui);
   }
@@ -785,7 +784,7 @@
   .preloader__crest{
     width:46px; height:46px; border-radius:50%; display:grid; place-items:center;
     border:1px solid rgba(234,217,174,0.55); position:relative;
-    opacity:0; transform:scale(0.85); transition:opacity 520ms ease 120ms, transform 520ms var(--ease-out) 120ms;
+    opacity:0; transform:scale(0.85); transition:opacity 235ms ease 55ms, transform 235ms var(--ease-out) 55ms;
   }
   .preloader__crest::after{
     content:""; position:absolute; inset:-6px; border-radius:50%; border:1px solid var(--teal); opacity:0.5;
@@ -844,7 +843,7 @@
   .btn-primary-navy::before, .btn-primary-ivory::before{
     content:""; position:absolute; top:0; left:-60%; width:36%; height:100%;
     background:linear-gradient(115deg, transparent, rgba(255,255,255,0.30), transparent);
-    transform:skewX(-18deg); transition:left 640ms var(--ease-out); pointer-events:none;
+    transform:skewX(-18deg); transition:left 380ms var(--ease-out); pointer-events:none;
   }
   @media (min-width:860px){
     .btn-primary-navy, .btn-primary-ivory{
@@ -865,7 +864,7 @@
     .principle-card:hover{ background:var(--white); transform:translateY(-3px); box-shadow:0 16px 32px -22px rgba(16,42,67,0.3); position:relative; z-index:1; }
   }
   .download-card{ transition:transform 260ms var(--ease-ui), box-shadow 260ms var(--ease-ui), border-color 260ms var(--ease-ui); }
-  .media-frame img{ transition:transform 700ms var(--ease-ui); }
+  .media-frame img{ transition:transform 400ms var(--ease-ui); }
   @media (min-width:860px){
     .download-card:hover{ transform:translateY(-3px); border-color:var(--gold); box-shadow:0 16px 32px -22px rgba(16,42,67,0.3); }
     .download-card:hover .media-frame img{ transform:scale(1.045); }
@@ -955,10 +954,15 @@
      colour, no icon, reuses --gold exactly as the rest of the system
      already treats it (small, intentional, rare). */
   .chapter-num{
-    color:var(--gold); font-weight:700; margin-right:10px;
+    color:var(--bronze); font-weight:700; margin-right:10px;
     font-variant-numeric:tabular-nums;
   }
   .chapter-num::after{ content:"·"; margin-left:10px; color:var(--stone); font-weight:400; }
+  /* On a navy band, bronze fails contrast (2.02:1) where gold passes (4.66:1) —
+     the inverse of the light-background case above. See V3_QA_REPORT.md's
+     contrast audit for the numbers. */
+  .eyebrow.on-navy .chapter-num{ color:var(--gold); }
+  .eyebrow.on-navy .chapter-num::after{ color:rgba(246,241,232,0.35); }
 
   /* ---------- Editorial list (card-reduction pattern) ----------
      A rule-separated, numeral-led row: the same information a 2×2 card
@@ -972,9 +976,13 @@
     padding:28px 0; border-bottom:1px solid var(--stone); align-items:start;
   }
   .edit-row .edit-idx{
-    font-family:var(--display); font-weight:700; font-size:1.5rem; color:var(--gold);
+    font-family:var(--display); font-weight:700; font-size:1.5rem; color:var(--bronze);
     line-height:1.3; font-variant-numeric:tabular-nums;
   }
+  /* Defensive on-navy override — no current page puts .edit-list on a dark
+     band, but if one does, bronze fails there (2.02:1) exactly like
+     .chapter-num above, where gold passes (4.66:1). */
+  .band-navy .edit-idx{ color:var(--gold); }
   .edit-row h3{ font-size:1.4rem; display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
   .edit-row h3 .status-pill{ margin-top:2px; }
   .edit-row p{ margin-top:8px; max-width:58ch; color:var(--ink); font-size:var(--fs-ui); }
@@ -988,7 +996,12 @@
      slightly more asymmetric column split and a small upward offset on
      the frame — an "editorial composition" cue rather than a centred
      50/50 split. Gated to ≥1040px only: Home's tested hero layout below
-     that width is untouched, so nothing here carries mobile/tablet risk. */
+     that width is untouched, so nothing here carries mobile/tablet risk.
+     Base rule is display:none — without it, a browser applies its
+     default display:block to this bare <div> below 1040px, which would
+     show the rotated label as plain unstyled block content above the
+     portrait instead of hiding it. */
+  .hero-rail{ display:none; }
   @media (min-width:1040px){
     .hero-grid{ grid-template-columns:0.74fr 1.26fr; gap:60px; }
     .hero-media{ position:relative; margin-top:-30px; }

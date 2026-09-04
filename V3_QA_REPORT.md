@@ -103,3 +103,100 @@ launch-ready" still applies verbatim: reference-only photography, no
 donation flow, working-copy biography and program text, no confirmed
 Foundation registration/governance detail, placeholder canonical domain.
 This pass did not touch content, sourcing, or any claim on any page.
+
+## Desktop scroll-performance pass (post-delivery fix)
+
+A "heavy scroll" report on desktop led to a real, verified root-cause fix
+— not a guess:
+
+1. **`backdrop-filter` on two scroll-affected elements.** `header.site`
+   (`position:sticky`) and `.mobile-cta-bar` (`position:fixed`) both
+   carried `backdrop-filter:blur(...)`. A blurred backdrop behind a
+   sticky/fixed element has to be recomputed continuously as new content
+   passes underneath it — a well-documented, genuinely expensive
+   per-frame cost, worse the longer the page (Home renders to ~9,800px).
+   Both already sat at 92–97% background opacity, where blur's visual
+   contribution was marginal — so it was removed outright rather than
+   just reduced, with background opacity nudged up slightly (header
+   0.92→0.96, CTA bar 0.94→0.97) to hold the same visual read.
+2. **Two unsynced animation-frame loops.** Lenis was driving itself on
+   its own independent `requestAnimationFrame` loop, separate from
+   GSAP's own ticker (which drives every tween and ScrollTrigger). Two
+   independent raf loops aren't guaranteed to execute in the same order
+   within a frame — a documented cause of jitter when Lenis and GSAP are
+   both present. Fixed by wiring Lenis onto `gsap.ticker.add()` instead
+   (with `gsap.ticker.lagSmoothing(0)`), the integration Lenis's own
+   docs recommend when GSAP is present — confirmed against Lenis's
+   GitHub README, not assumed.
+3. **Lenis `duration` lowered 1.05s → 0.85s.** Per Lenis's own docs,
+   duration is literally the heavy-vs-snappy knob ("higher values feel
+   heavier and more cinematic; lower values feel snappier") — confirmed
+   via Lenis's own documentation, not guessed. Still well under the
+   library's own default of 1.2s pre-fix; now clearly on the snappy side
+   of it, matching this project's own brief ("responsive... never
+   sluggish, never overly eased").
+
+**Not re-verified visually** — same limitation as the rest of this
+report: no headless browser in this environment, so the *feel* of the
+fix (does it now actually read as snappy) hasn't been watched, only
+reasoned from documented cause → documented fix. Confirm on a real
+desktop browser before calling this closed.
+
+## Responsiveness pass (post-delivery)
+
+A follow-up request to make the site "more responsive" on both mobile
+and desktop. Distinct from the earlier scroll-performance fix — this
+targeted forced waits, load priority, and interaction-feedback speed.
+
+1. **Preloader forced-minimum cut from ~2.44s to ~1.1s (55% less).**
+   The engraved-line-drawing intro had a hard-coded minimum runtime
+   (149 rows × 5.5ms stagger + fixed resolve/fade stages) that applied
+   on *every* first visit regardless of connection speed — and
+   `body.is-locked{ overflow:hidden }` meant scroll was fully blocked
+   for that whole window. Retimed every stage (row stagger, resolve,
+   fade) by a uniform ~0.45× factor, so the sequence is proportionally
+   identical, just not glacial. This also brings it back in line with
+   this project's own original brief, which explicitly calls for "no
+   long wait" on the intro.
+   - **Caught in the process:** the preloader crest's own fade/scale-in
+     transition (520ms + 120ms delay = 640ms) was tied to the same
+     `is-resolving` class as the portrait, but I'd only retimed the
+     portrait's transition, not the crest's — it would have been cut off
+     mid-animation once the JS moved on after the new, shorter
+     RESOLVE_MS. Retimed it too (now 235ms + 55ms delay = 290ms),
+     re-verified it fits inside the new 370ms window with margin.
+2. **Image loading priority.** None of the site's 30 `<img>` tags had
+   `loading` or `decoding` attributes — every image on every page loaded
+   eagerly, competing for bandwidth with whatever's actually above the
+   fold. Added `decoding="async"` to all 30 (always safe, never delays
+   paint) and `loading="lazy"` to the 11 that are never the first image
+   on their page (footer logo on all 19 pages, plus secondary photos on
+   About/Index/News/the three field notes) — the first image per page
+   stays eager for fastest initial paint.
+3. **Hover-feedback transitions tightened.** Two were slow relative to
+   the rest of the system's 160–320ms interactive language: the primary-
+   button sheen sweep (640ms → 380ms) and the card image hover-zoom
+   (700ms → 400ms, `.media-frame img`, used by download/record/program
+   card hovers).
+4. **Scroll-entrance reveals tightened.** The `rise`/`scale`/`mask`
+   reveal durations from the earlier V3 pass (0.75s/0.8s/0.9s) are now
+   0.45s/0.5s/0.55s, and the reveal-group stagger is 0.06s (was 0.09s) —
+   content that's scrolled past no longer visibly lags behind a fast
+   scroller. The hero's own entrance (title lines, hero items, frame-
+   cover wipe — the first thing a visitor sees right after the
+   preloader) got the same tightening, proportionally.
+5. **Left alone, on purpose:** `[data-tone-reveal] img{ transition:filter
+   900ms }` — the one-time desaturate-to-colour reveal on portraits as
+   they scroll into view. Nothing is blocked while it runs (it's a
+   passive colour fade, not a gate on any interaction), and it's a
+   deliberate "cinematic" pacing choice the brief explicitly asks for —
+   tightening every animation indiscriminately would have traded the
+   site's actual character for a number, not for anything a visitor
+   would experience as "more responsive."
+
+**Not re-verified visually** — same standing limitation: no headless
+browser here, so none of this has been watched running. The JS/CSS
+timing-value pairs were cross-checked numerically (see the constants
+listed above) rather than eyeballed, which is how the crest desync was
+actually caught — but confirm the feel on a real browser before this
+goes out.

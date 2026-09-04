@@ -13,12 +13,20 @@
    no-JS visit since the underlying page is already complete without it. */
 (function(){
   var SEEN_KEY = 'aw-intro-seen';
-  var ROWS = 149, ROW_DELAY_MS = 5.5, ROW_TRANSITION_MS = 420;
+  /* Timings below must stay in sync with the matching CSS transition
+     durations in style.css (search "preloader") — this file only
+     computes when to swap classes; the CSS is what actually animates.
+     Scaled ~0.45x from the original pass: the same draw → resolve →
+     fade sequence, same relative rhythm between stages, just no longer
+     a ~2.4s forced-minimum wait (with scroll locked via body.is-locked)
+     before a first-time visitor could do anything at all — see
+     V3_QA_REPORT.md. */
+  var ROWS = 149, ROW_DELAY_MS = 2.5, ROW_TRANSITION_MS = 190;
   var DRAW_MS = ROWS * ROW_DELAY_MS + ROW_TRANSITION_MS; // last row's delay + its own transition
-  var PHOTO_TIMEOUT_MS = 1800;   // generous even though the photo is inlined, not fetched
-  var MAX_CAP_MS = 3200;         // hard ceiling from show to resolve, whatever the device is doing
-  var RESOLVE_MS = 820;          // matches .preloader__portrait transition
-  var FADE_MS = 380;             // matches .preloader opacity transition
+  var PHOTO_TIMEOUT_MS = 800;    // generous even though the photo is inlined, not fetched
+  var MAX_CAP_MS = 1450;         // hard ceiling from show to resolve, whatever the device is doing
+  var RESOLVE_MS = 370;          // matches .preloader__portrait transition
+  var FADE_MS = 170;             // matches .preloader opacity transition
   var PHOTO_SRC = 'assets/img/preloader-portrait.webp';
 
   function reducedMotion(){
