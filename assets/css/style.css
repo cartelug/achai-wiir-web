@@ -321,7 +321,7 @@
   .hero::before{
     content:""; position:absolute; inset:0; z-index:0;
     background-image:url("../img/press/hero-founder-mobile.webp");
-    background-size:cover; background-position:50% 14%;
+    background-size:cover; background-position:50% 8%;
   }
   .hero-scrim{
     position:absolute; inset:0; z-index:1; pointer-events:none;
@@ -330,7 +330,7 @@
   .hero .frame-cover{ z-index:2; }
   .hero-copy{ position:relative; z-index:3; width:100%; padding-block:64px 40px; }
   .hero .eyebrow{ color:var(--stone); text-shadow:0 1px 6px rgba(16,42,67,0.55); }
-  .hero h1{ font-size:var(--fs-hero); line-height:0.98; margin:14px 0 20px; color:var(--white); }
+  .hero h1{ font-size:var(--fs-hero); line-height:0.98; margin:14px 0 20px; color:var(--white); text-shadow:0 2px 20px rgba(16,42,67,0.5); }
   .hero h1 .line{ display:block; overflow:hidden; }
   .hero h1 .line-inner{ display:block; }
   .hero .lead{ font-size:var(--fs-lead); line-height:1.5; color:#E7DFCF; max-width:52ch; }
@@ -363,6 +363,13 @@
      trying to predict it via vh arithmetic. */
   @media (max-width:859px){
     .hero{ padding-bottom:calc(72px + env(safe-area-inset-bottom)); }
+    /* The mobile hero crop is a tall portrait with the subject's face
+       close to the middle of the frame — unlike the wide desktop crop
+       (subject off to one side, plenty of clear backdrop for the
+       headline), there's little room to pan the photo clear of the text
+       on a narrow viewport. A stronger, earlier-starting scrim carries
+       the difference instead of fighting the crop further. */
+    .hero-scrim{ background:linear-gradient(180deg, rgba(16,42,67,0.42) 0%, rgba(16,42,67,0.6) 45%, rgba(16,42,67,0.94) 100%); }
   }
   @media (min-width:860px){
     .hero::before{ background-image:url("../img/press/hero-founder-desktop.webp"); background-position:68% 24%; }
