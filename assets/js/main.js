@@ -18,12 +18,12 @@
     menu.classList.add('open');
     menuBtn.setAttribute('aria-expanded','true');
     document.body.style.overflow = 'hidden';
-    /* header.site is normally position:sticky, so at scroll 0 it sits
-       below the concept-strip banner rather than at the viewport top —
-       the full-screen menu's own top padding assumes a fixed, known
-       header height, so pin the header to the very top for as long as
-       the menu is open (regardless of where the page had scrolled to)
-       instead of trying to predict/match its sticky position. */
+    /* header.site is normally position:sticky — if the page is already
+       scrolled when the menu opens, sticky keeps it pinned at the top
+       anyway, but the full-screen menu's own top padding assumes a
+       fixed, known header height regardless, so this pins the header to
+       the true viewport top for as long as the menu is open rather than
+       relying on that. */
     document.body.classList.add('menu-open');
   }
   menuBtn.addEventListener('click', function(){
@@ -57,6 +57,39 @@
      Impact Archive) is handled generically by assets/js/archive-filter.js
      via data-fgroup/data-fvalue/data-filter-card, so every filter group on
      a page works independently instead of one shared, ungrouped handler. */
+
+  /* ---------- Intro disclosure modal ----------
+     Shows once per browser (localStorage, not sessionStorage — the ask
+     was "always on first open," not "once per tab"), first paint of any
+     page on the site, not just Home: it's about the whole site's photos,
+     not one page's. A visitor who lands directly on an interior page via
+     a shared link still sees it before anything else. */
+  var introModal = document.getElementById('introModal');
+  if (introModal && typeof introModal.showModal === 'function') {
+    var INTRO_KEY = 'awf-intro-seen';
+    var introOk = document.getElementById('introModalOk');
+    var seen = false;
+    try { seen = localStorage.getItem(INTRO_KEY) === '1'; } catch(e){}
+    function dismissIntro(){
+      introModal.close();
+      try { localStorage.setItem(INTRO_KEY, '1'); } catch(e){}
+    }
+    if (!seen) {
+      try { introModal.showModal(); } catch(e){}
+    }
+    if (introOk) introOk.addEventListener('click', dismissIntro);
+    /* Clicking the ::backdrop (outside the card) also dismisses it —
+       a click whose target is the <dialog> itself, not a descendant,
+       only happens on the backdrop area since the card fills the rest. */
+    introModal.addEventListener('click', function(e){
+      if (e.target === introModal) dismissIntro();
+    });
+    /* Native Esc-to-close already fires the dialog's 'cancel'/'close'
+       events without any listener needed — just persist the flag too. */
+    introModal.addEventListener('close', function(){
+      try { localStorage.setItem(INTRO_KEY, '1'); } catch(e){}
+    });
+  }
 
   var form = document.getElementById('contactForm');
   var confirm = document.getElementById('formConfirm');

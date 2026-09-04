@@ -120,14 +120,38 @@
   .rule{ height:1px; background:var(--stone); border:0; margin:0; }
   .rule.gold{ background:var(--gold); width:56px; height:2px; border:0; }
 
-  /* ============ Utility disclosure strip ============ */
-  .concept-strip{
-    background:var(--navy); color:var(--stone);
-    font-size:0.78rem; letter-spacing:0.01em;
-    padding:10px var(--gutter);
-    text-align:center;
+  /* ============ Intro disclosure modal ============
+     Was a permanent top-of-page strip; now a first-visit popup instead —
+     see main.js. A native <dialog>, not a hand-rolled overlay div: no
+     `open` attribute in the markup, so it's inert until main.js calls
+     showModal() — free focus-trapping, Esc-to-close, and a ::backdrop,
+     and it degrades honestly (simply never appears) rather than half-
+     working if JS is blocked, consistent with the mobile menu elsewhere
+     on this site already being fully JS-dependent. The footer's existing
+     "concept for review, not for public release" line is the permanent,
+     no-JS-required trace of the same disclosure. */
+  .intro-modal{
+    border:0; border-radius:2px; padding:0; max-width:min(460px, calc(100vw - 40px));
+    background:var(--navy); box-shadow:0 30px 60px -20px rgba(16,42,67,0.6);
   }
-  .concept-strip strong{ color:var(--white); font-weight:600; }
+  .intro-modal::backdrop{ background:rgba(16,42,67,0.72); backdrop-filter:blur(2px); }
+  .intro-modal-body{ padding:30px 28px 28px; }
+  .intro-modal-kicker{
+    font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--gold); margin:0;
+  }
+  .intro-modal h2{
+    font-size:1.5rem; color:var(--white); margin-top:10px; line-height:1.15;
+  }
+  .intro-modal p:not(.intro-modal-kicker){
+    font-size:0.92rem; line-height:1.6; color:#C9D2DA; margin-top:14px;
+  }
+  .intro-modal .btn{ margin-top:22px; width:100%; }
+  @media (prefers-reduced-motion: no-preference){
+    .intro-modal{ transition:opacity 220ms var(--ease-ui), transform 220ms var(--ease-ui), overlay 220ms allow-discrete, display 220ms allow-discrete; opacity:0; transform:translateY(10px) scale(0.98); }
+    .intro-modal[open]{ opacity:1; transform:translateY(0) scale(1); }
+    @starting-style{ .intro-modal[open]{ opacity:0; transform:translateY(10px) scale(0.98); } }
+  }
 
   /* ============ Header ============ */
   header.site{
@@ -289,6 +313,13 @@
     min-height:min(88vh, 880px); min-height:min(88dvh, 880px);
     display:flex; align-items:flex-end;
     background-color:var(--navy);
+  }
+  /* The photo lives on its own layer (::before), not as .hero's own
+     background — that's what lets the desktop-only Ken Burns zoom below
+     scale just the image via transform (cheap, compositor-only) without
+     touching layout or the text sitting on top of it. */
+  .hero::before{
+    content:""; position:absolute; inset:0; z-index:0;
     background-image:url("../img/press/hero-founder-mobile.webp");
     background-size:cover; background-position:50% 14%;
   }
@@ -334,7 +365,7 @@
     .hero{ padding-bottom:calc(72px + env(safe-area-inset-bottom)); }
   }
   @media (min-width:860px){
-    .hero{ background-image:url("../img/press/hero-founder-desktop.webp"); background-position:68% 24%; }
+    .hero::before{ background-image:url("../img/press/hero-founder-desktop.webp"); background-position:68% 24%; }
     .hero-copy{ max-width:640px; padding-block:0; }
     .media-frame{ max-height:640px; }
   }
@@ -343,6 +374,19 @@
      monitor if its own cap doesn't grow with it — so it grows too,
      proportionally, instead of stopping at the laptop-tuned 640px forever. */
   @media (min-width:1440px){ .leader-media .media-frame, .profile-media .media-frame{ max-height:760px; } }
+
+  /* ---------- PC motion track ----------
+     Desktop-only, deliberately light: a one-time CSS @keyframes zoom on
+     the hero image (compositor-only transform, no scroll listener at
+     all — the opposite of what made scroll feel heavy before) and a
+     magnetic pull on primary buttons driven by mousemove, which only
+     ever runs while a pointer is actively over one button, not on every
+     scroll or animation frame site-wide. Gated to a real mouse (not a
+     touchscreen masquerading as wide) and no-preference motion. */
+  @media (min-width:860px) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion: no-preference){
+    .hero::before{ animation:heroKenBurns 16s var(--ease-out) forwards; }
+  }
+  @keyframes heroKenBurns{ from{ transform:scale(1); } to{ transform:scale(1.045); } }
 
   /* ============ Trust line ============ */
   .trust{
@@ -832,7 +876,8 @@
     :root{ --gutter:18px; }
     section{ padding-block:56px; }
     section.tight{ padding-block:44px; }
-    .concept-strip{ font-size:0.7rem; line-height:1.4; padding:8px 18px; }
+    .intro-modal-body{ padding:24px 20px 22px; }
+    .intro-modal h2{ font-size:1.3rem; }
     .hero{ min-height:60vh; min-height:60dvh; }
     .hero-copy{ padding-block:36px 28px; }
     .page-hero{ padding-bottom:36px; }

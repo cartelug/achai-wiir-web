@@ -1,74 +1,56 @@
 /* ============================================================
    Achai Wiir — motion.js
-   Lenis smooth scroll + GSAP/ScrollTrigger reveals. Loaded after the
-   gsap / ScrollTrigger / lenis CDN <script> tags in index.html, and
-   before preloader.js (which dispatches the 'preloader:done' event this
-   file listens for to time the hero entrance).
+   GSAP/ScrollTrigger reveals, off native scroll. Loaded after the
+   gsap / ScrollTrigger CDN <script> tags in index.html, and before
+   preloader.js (which dispatches the 'preloader:done' event this file
+   listens for to time the hero entrance).
+
+   v6.1: this used to also run Lenis (JS-driven smooth scroll). Removed —
+   it was the source of a reported "heavy"/glitchy scroll feel: Lenis
+   eases every wheel/touch input through its own virtual scroll position,
+   which (a) reads as laggy compared to native scroll on exactly the kind
+   of heavier, image-heavy sections this redesign added, and (b) is a
+   known source of desync with position:sticky elements (the header,
+   meta-card sidebars, the map frame), since sticky positioning is
+   computed against native scroll and Lenis's virtual position doesn't
+   always land in the same frame. Native scroll plus CSS
+   scroll-behavior:smooth (see style.css, already off under reduced
+   motion) gives the same "smooth anchor-link jump" without either
+   problem, and drops one external CDN dependency in the process.
 
    Everything here is a progressive enhancement over a page that already
    works and reads correctly without it: reduced motion skips it
-   outright, and a blocked CDN (window.gsap / window.Lenis undefined)
-   makes every function below a silent no-op, leaving plain CSS in
-   charge — see README.md for the fallback behaviour this guarantees.
+   outright, and a blocked CDN (window.gsap undefined) makes every
+   function below a silent no-op, leaving plain CSS in charge — see
+   README.md for the fallback behaviour this guarantees.
    ============================================================ */
-
-/* Motion layer — Lenis smooth scroll + GSAP/ScrollTrigger reveals.
-   Everything here is a progressive enhancement over a page that already
-   works and reads correctly without it: reduced motion skips it outright,
-   and a blocked CDN (window.gsap/window.Lenis undefined) makes every
-   function below a silent no-op, leaving plain CSS in charge. */
 (function(){
   function reducedMotion(){
     try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){ return false; }
   }
   var REDUCED = reducedMotion();
   var hasGSAP = Boolean(window.gsap && window.ScrollTrigger);
-  if (hasGSAP) gsap.registerPlugin(ScrollTrigger);
-
-  /* ---------- Lenis smooth scroll ----------
-     Wired onto gsap.ticker rather than its own independent
-     requestAnimationFrame loop — the integration Lenis's own docs
-     recommend for pairing with GSAP/ScrollTrigger. Two separate raf
-     loops (Lenis driving itself, GSAP's ticker driving every tween and
-     ScrollTrigger) aren't guaranteed to run in the same order within a
-     frame; putting Lenis on GSAP's ticker makes GSAP the single source
-     of frame timing, which is what actually fixed the "heavy"/uneven
-     desktop scroll feel — see V3_QA_REPORT.md. lagSmoothing(0) is the
-     other half of that same standard recipe: without it, GSAP's
-     automatic catch-up-after-a-stall logic can fight a smoothed scroll
-     position and read as a stutter. duration is lower than Lenis's own
-     default (1.2s) on purpose — higher values read as "heavier and more
-     cinematic," lower as snappier, per Lenis's own docs, and this
-     project's brief explicitly calls for scroll that's "responsive,
-     direct... never sluggish, never overly eased." */
-  var lenis = null;
-  if (!REDUCED && window.Lenis) {
-    lenis = new Lenis({ duration: 0.85, smoothWheel: true, syncTouch: false });
-    lenis.on('scroll', function(){
-      if (window.ScrollTrigger) ScrollTrigger.update();
-      onScroll();
-    });
-    if (hasGSAP) {
-      gsap.ticker.add(function(time){ lenis.raf(time * 1000); });
-      gsap.ticker.lagSmoothing(0);
-    } else {
-      (function raf(time){ lenis.raf(time); requestAnimationFrame(raf); })();
-    }
+  if (hasGSAP) {
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.ticker.lagSmoothing(0);
   }
 
-  /* Anchor links scroll through Lenis (when present) so in-page navigation
-     matches the rest of the page's feel; falls back to native smooth
-     scrolling untouched when Lenis didn't load. */
+  /* Anchor links: native scrollIntoView with a manual offset tween isn't
+     needed — scroll-behavior:smooth (CSS) already animates the jump;
+     this just corrects the landing position for the sticky header's
+     height, which a plain #hash jump / scrollIntoView doesn't know
+     about. */
   document.querySelectorAll('a[href^="#"]').forEach(function(a){
     var id = a.getAttribute('href');
     if (id.length < 2) return;
     a.addEventListener('click', function(e){
       var target = document.querySelector(id);
       if (!target) return;
-      if (lenis) {
-        e.preventDefault();
-        lenis.scrollTo(target, { offset: -64, duration: REDUCED ? 0 : 1.0 });
-      }
+      e.preventDefault();
+      var headerEl = document.querySelector('header.site');
+      var offset = (headerEl ? headerEl.offsetHeight : 68) + 12;
+      var y = target.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({ top: y, behavior: REDUCED ? 'auto' : 'smooth' });
     });
   });
 
@@ -84,7 +66,8 @@
       progress.style.width = pct + '%';
     }
   }
-  if (!lenis) window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('scroll', onScroll, { passive: true });
+  if (hasGSAP) ScrollTrigger.addEventListener('refresh', onScroll);
   onScroll();
 
   /* ---------- Hero entrance ---------- */
@@ -171,7 +154,7 @@
   }
 
   /* ---------- Portrait tone-reveal ----------
-     Independent of GSAP/Lenis on purpose. Every [data-tone-reveal] photo
+     Independent of GSAP on purpose. Every [data-tone-reveal] photo
      is already full-colour in plain CSS (see style.css) — this only ever
      *adds* a brief, reduced-motion-respecting desaturation that resolves
      when the portrait scrolls into view. If this script never runs (blocked
@@ -194,5 +177,32 @@
         toneIO.observe(el);
       });
     }
+  }
+
+  /* ---------- PC-only: magnetic primary buttons ----------
+     A mousemove listener per button, only ever live while the pointer is
+     actually over that one element — not a scroll or global-frame cost,
+     the opposite of what made scroll feel heavy before this pass. Gated
+     to a real mouse and no-preference motion; a touchscreen (even a wide
+     one) never attaches this. Primary CTAs only — restrained on purpose,
+     not every button on the page. */
+  var wantsMagnetic = !REDUCED
+    && window.matchMedia('(hover:hover)').matches
+    && window.matchMedia('(pointer:fine)').matches;
+  if (wantsMagnetic) {
+    document.querySelectorAll('.btn-primary-navy, .btn-primary-ivory').forEach(function(btn){
+      function reset(){ btn.style.transform = ''; }
+      btn.addEventListener('mousemove', function(e){
+        var r = btn.getBoundingClientRect();
+        var x = e.clientX - r.left - r.width / 2;
+        var y = e.clientY - r.top - r.height / 2;
+        /* -2px baked into the y offset so this composes with, rather than
+           overrides (inline style beats stylesheet), the existing
+           hover:translateY(-2px) lift defined in style.css. */
+        btn.style.transform = 'translate(' + (x * 0.18).toFixed(1) + 'px,' + (y * 0.28 - 2).toFixed(1) + 'px)';
+      });
+      btn.addEventListener('mouseleave', reset);
+      btn.addEventListener('blur', reset);
+    });
   }
 })();
