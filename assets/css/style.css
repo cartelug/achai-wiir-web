@@ -73,6 +73,17 @@
     --ease-ui:  cubic-bezier(0.4, 0, 0.2, 1);
   }
   @media (min-width:430px){ :root{ --gutter: 24px; } }
+  /* ============ v4 — large-screen container scaling ============
+     --maxw was a flat 1180px at every viewport, so a 1920px or 2560px
+     monitor rendered the same narrow column as a 1280px laptop with two
+     enormous empty margins either side — the site didn't respond to the
+     screen at all above laptop width. Grown here in three tiers instead
+     of one open-ended clamp(), so prose measure (already separately
+     capped in ch units on .prose/.legal-article/etc.) never runs away on
+     an ultra-wide display; only the section "well" gets more room. */
+  @media (min-width:1280px){ :root{ --maxw: 1240px; } }
+  @media (min-width:1440px){ :root{ --maxw: 1320px; --gutter: 32px; } }
+  @media (min-width:1920px){ :root{ --maxw: 1480px; --gutter: 40px; } }
 
   *,*::before,*::after{ box-sizing:border-box; }
   html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
@@ -248,6 +259,11 @@
     .hero-copy{ order:1; } .hero-media{ order:2; }
     .media-frame{ aspect-ratio:4/5; max-height:640px; }
   }
+  /* A wider container (see --maxw above) leaves the hero portrait looking
+     small and adrift on a large monitor if its own cap doesn't grow with
+     it — so it grows too, proportionally, instead of stopping at the
+     laptop-tuned 640px forever. */
+  @media (min-width:1440px){ .hero-media .media-frame{ max-height:760px; } }
 
   /* ============ Trust line ============ */
   .trust{
@@ -260,6 +276,11 @@
 
   /* ============ Evidence strip ============ */
   .evidence-grid{ display:grid; gap:1px; background:var(--stone); border:1px solid var(--stone); }
+  /* v4: a 2-up tier before the 3-up one — previously this jumped straight
+     from one column to three at 760px, so every width from ~430px to
+     759px (small tablets, foldables unfolded, phones in landscape) sat in
+     a single stacked column despite having room for two. */
+  @media (min-width:560px){ .evidence-grid{ grid-template-columns:repeat(2,1fr); } }
   @media (min-width:760px){ .evidence-grid{ grid-template-columns:repeat(3,1fr); } }
   .evidence-card{ background:var(--ivory); padding:30px 26px; transition:background 260ms var(--ease-ui), box-shadow 260ms var(--ease-ui), transform 260ms var(--ease-ui); }
   .evidence-card:hover{ background:var(--white); transform:translateY(-3px); box-shadow:0 16px 32px -22px rgba(16,42,67,0.35); position:relative; z-index:1; }
@@ -302,7 +323,7 @@
   }
   .chip[aria-pressed="true"]{ background:var(--navy); color:var(--white); border-color:var(--navy); }
   .place-grid{ display:grid; gap:16px; }
-  @media (min-width:720px){ .place-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (min-width:560px){ .place-grid{ grid-template-columns:repeat(2,1fr); } }
   @media (min-width:1080px){ .place-grid{ grid-template-columns:repeat(3,1fr); } }
   .place-card{
     border:1px solid var(--stone); padding:24px; background:var(--ivory);
@@ -317,7 +338,7 @@
 
   /* ============ Program pillars ============ */
   .pillar-grid{ display:grid; gap:1px; background:var(--stone); border:1px solid var(--stone); }
-  @media (min-width:720px){ .pillar-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (min-width:560px){ .pillar-grid{ grid-template-columns:repeat(2,1fr); } }
   .pillar-card{ background:var(--ivory); padding:28px 26px; transition:background 260ms var(--ease-ui), transform 260ms var(--ease-ui); }
   .pillar-card:hover{ background:var(--white); transform:translateY(-3px); position:relative; z-index:1; box-shadow:0 16px 32px -22px rgba(16,42,67,0.3); }
   .pillar-card h3{ font-size:1.45rem; margin:12px 0 8px; }
@@ -340,6 +361,7 @@
 
   /* ============ News ============ */
   .news-grid{ display:grid; gap:24px; }
+  @media (min-width:560px){ .news-grid{ grid-template-columns:repeat(2,1fr); } }
   @media (min-width:760px){ .news-grid{ grid-template-columns:repeat(3,1fr); } }
   .news-card{ border-top:2px solid var(--ink); padding-top:16px; display:flex; flex-direction:column; gap:10px; transition:border-color 260ms var(--ease-ui), transform 260ms var(--ease-ui); }
   .news-card:hover{ border-color:var(--gold); transform:translateY(-3px); }
@@ -351,7 +373,12 @@
 
   /* ============ Partner ============ */
   .partner-grid{ display:grid; gap:16px; margin-top:36px; }
-  @media (min-width:720px){ .partner-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (min-width:560px){ .partner-grid{ grid-template-columns:repeat(2,1fr); } }
+  /* v4: item count varies by page (3 on About, 4 on Home) — auto-fit lets
+     each page settle into however many equal columns its own cards fill
+     cleanly at this width, instead of a hardcoded count that's a clean
+     single row on one page and an awkward leftover on another. */
+  @media (min-width:1100px){ .partner-grid{ grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); } }
   .partner-card{ border:1px solid rgba(246,241,232,0.25); padding:26px; transition:border-color 260ms var(--ease-ui), background 260ms var(--ease-ui); }
   .partner-card:hover{ border-color:var(--gold); background:rgba(246,241,232,0.04); }
   .partner-card h3{ font-size:1.3rem; color:var(--white); }
@@ -387,6 +414,7 @@
   /* ============ Footer ============ */
   footer{ background:var(--navy); color:var(--stone); padding-block:64px 30px; }
   .footer-top{ display:grid; gap:40px; }
+  @media (min-width:600px){ .footer-top{ grid-template-columns:1fr 1fr; } }
   @media (min-width:860px){ .footer-top{ grid-template-columns:1.1fr 0.9fr 0.9fr 0.9fr; } }
   .footer-brand img{ width:52px; height:52px; object-fit:contain; background:var(--white); padding:6px; border-radius:2px; }
   .footer-brand p{ font-size:var(--fs-cap); color:#AEB9C4; margin-top:14px; max-width:34ch; }
@@ -514,7 +542,7 @@
   details.expand[open] summary::after{ content:"Show less –"; }
   details.expand summary .sum-label{ display:none; }
   .principle-grid{ display:grid; gap:1px; background:var(--stone); border:1px solid var(--stone); margin-top:14px; }
-  @media (min-width:700px){ .principle-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (min-width:560px){ .principle-grid{ grid-template-columns:repeat(2,1fr); } }
   .principle-card{ background:var(--ivory); padding:24px; }
   .principle-num{ font-family:var(--display); font-weight:700; color:var(--bronze); font-size:1.6rem; }
   .principle-card h4{ font-size:1.15rem; margin:8px 0 6px; font-family:var(--display); font-weight:600; }
@@ -592,7 +620,7 @@
 
   /* ---------- Program cards (Our Work index) ---------- */
   .program-grid{ display:grid; gap:1px; background:var(--stone); border:1px solid var(--stone); margin-top:8px; }
-  @media (min-width:720px){ .program-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (min-width:560px){ .program-grid{ grid-template-columns:repeat(2,1fr); } }
   .program-card{
     background:var(--ivory); padding:30px 26px; display:flex; flex-direction:column; gap:10px;
     text-decoration:none; color:inherit; transition:background 260ms var(--ease-ui), transform 260ms var(--ease-ui);
@@ -661,6 +689,7 @@
   #kit-120:checked ~ .kit-panels #kit-panel-120,
   #kit-300:checked ~ .kit-panels #kit-panel-300{ display:block; }
   .download-grid{ display:grid; gap:16px; margin-top:14px; }
+  @media (min-width:480px){ .download-grid{ grid-template-columns:repeat(2,1fr); } }
   @media (min-width:700px){ .download-grid{ grid-template-columns:repeat(3,1fr); } }
   .download-card{ border:1px solid var(--stone); background:var(--ivory); overflow:hidden; }
   .download-card .media-frame{ aspect-ratio:4/3; }
@@ -742,6 +771,47 @@
   }
   html{ overflow-x:hidden; }
   body{ overflow-x:hidden; }
+
+  /* ============================================================
+     v4 — responsive overhaul
+     Three gaps the V3 pass didn't touch: (1) large/PC screens beyond
+     laptop width all rendered the same fixed layout as 1280px, wasting
+     the screen instead of using it; (2) the tablet/small-laptop range
+     (roughly 430–860px) jumped straight from one column to a wide-desktop
+     column count with no intermediate step, and the smallest phones
+     (sub-360px) crowded the header; (3) short/landscape viewports could
+     clip the preloader. --maxw/--gutter scaling and the grid breakpoints
+     live inline above, next to the rules they extend; what's left here is
+     what didn't have a natural home next to an existing rule.
+     ============================================================ */
+
+  /* ---------- Wide desktop: two more grids get a matching column count
+     once there's room, instead of staying frozen at the 2-up tablet
+     layout on a 1440–2560px monitor ---------- */
+  @media (min-width:1100px){
+    .program-grid, .principle-grid{ grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); }
+  }
+
+  /* ---------- Sub-360px phones: the header's wordmark + Partner button +
+     menu toggle only got genuinely tight below ~360px (verified: no
+     horizontal overflow down to 280px, but uncomfortably close) — trim
+     padding and gap rather than drop a reachable action. ---------- */
+  @media (max-width:359px){
+    .wordmark{ font-size:1.02rem; }
+    .header-actions{ gap:6px; }
+    .header-actions .btn-sm{ padding:0 12px; font-size:0.8rem; }
+  }
+
+  /* ---------- Short viewports (landscape phones, small laptop windows in
+     a snapped/split window): the preloader's portrait stage sizes off
+     vw alone, so on a wide-but-short viewport (e.g. a phone rotated to
+     landscape, ~everything ≥568px wide but as little as 320px tall) it
+     can run taller than the screen, clipping the name/role text. Adding
+     a vh ceiling keeps the whole mark on-screen regardless of aspect. ---------- */
+  @media (max-height:480px){
+    .preloader{ gap:0.6rem; }
+    .preloader__stage{ width:min(64vw, 42vh, 300px); }
+  }
 
   /* ============================================================
      Design-psychology refinement pass:
