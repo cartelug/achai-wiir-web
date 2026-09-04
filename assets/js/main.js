@@ -12,11 +12,19 @@
     menu.classList.remove('open');
     menuBtn.setAttribute('aria-expanded','false');
     document.body.style.overflow = '';
+    document.body.classList.remove('menu-open');
   }
   function openMenu(){
     menu.classList.add('open');
     menuBtn.setAttribute('aria-expanded','true');
     document.body.style.overflow = 'hidden';
+    /* header.site is normally position:sticky, so at scroll 0 it sits
+       below the concept-strip banner rather than at the viewport top —
+       the full-screen menu's own top padding assumes a fixed, known
+       header height, so pin the header to the very top for as long as
+       the menu is open (regardless of where the page had scrolled to)
+       instead of trying to predict/match its sticky position. */
+    document.body.classList.add('menu-open');
   }
   menuBtn.addEventListener('click', function(){
     var expanded = menuBtn.getAttribute('aria-expanded') === 'true';
@@ -28,6 +36,22 @@
   document.addEventListener('keydown', function(e){
     if(e.key === 'Escape' && menu.classList.contains('open')){ closeMenu(); menuBtn.focus(); }
   });
+
+  /* Swipe-down-to-close: a second, thumb-natural way to dismiss the
+     full-screen menu alongside the header's hamburger-to-× toggle and
+     Escape. A plain vertical-distance threshold, not a velocity/fling
+     detector — simple enough to not need a gesture library, generous
+     enough (80px) not to fire on an ordinary scroll-within-the-list tap. */
+  var touchStartY = null;
+  menu.addEventListener('touchstart', function(e){
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  menu.addEventListener('touchend', function(e){
+    if (touchStartY === null) return;
+    var dy = e.changedTouches[0].clientY - touchStartY;
+    touchStartY = null;
+    if (dy > 80) closeMenu();
+  }, { passive: true });
 
   /* Chip-driven filtering (the Home impact-by-place teaser, and the full
      Impact Archive) is handled generically by assets/js/archive-filter.js

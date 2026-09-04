@@ -1,32 +1,28 @@
 /* ============================================================
    Achai Wiir — Homepage stylesheet
    "Nile Editorial" design system: Nile Navy / Warm Ivory / Heritage Gold,
-   Cormorant Garamond (display) + Manrope (UI/body), self-hosted as
-   subset WOFF2 files under ../fonts/. See README.md at the project root
+   Fraunces (display) + Public Sans (UI/body), self-hosted as variable
+   WOFF2 files under ../fonts/. See README.md at the project root
    for the working-copy / rights-clearance status of the content this
    stylesheet renders.
    ============================================================ */
 
-  /* ============ Typefaces — self-hosted, subset to the glyphs this page
-     uses (Basic Latin + Latin-1 + general punctuation + arrows). No
-     external font request: nothing to flash-of-unstyled-text against,
-     nothing that depends on a third-party CDN being up. ============ */
-  @font-face{ font-family:"Manrope"; font-weight:400; font-style:normal; font-display:swap;
-    src:url("../fonts/manrope/manrope-400.woff2") format("woff2"); }
-  @font-face{ font-family:"Manrope"; font-weight:500; font-style:normal; font-display:swap;
-    src:url("../fonts/manrope/manrope-500.woff2") format("woff2"); }
-  @font-face{ font-family:"Manrope"; font-weight:600; font-style:normal; font-display:swap;
-    src:url("../fonts/manrope/manrope-600.woff2") format("woff2"); }
-  @font-face{ font-family:"Manrope"; font-weight:700; font-style:normal; font-display:swap;
-    src:url("../fonts/manrope/manrope-700.woff2") format("woff2"); }
-  @font-face{ font-family:"Cormorant Garamond"; font-weight:500; font-style:normal; font-display:swap;
-    src:url("../fonts/cormorant-garamond/cormorant-500.woff2") format("woff2"); }
-  @font-face{ font-family:"Cormorant Garamond"; font-weight:500; font-style:italic; font-display:swap;
-    src:url("../fonts/cormorant-garamond/cormorant-500italic.woff2") format("woff2"); }
-  @font-face{ font-family:"Cormorant Garamond"; font-weight:600; font-style:normal; font-display:swap;
-    src:url("../fonts/cormorant-garamond/cormorant-600.woff2") format("woff2"); }
-  @font-face{ font-family:"Cormorant Garamond"; font-weight:700; font-style:normal; font-display:swap;
-    src:url("../fonts/cormorant-garamond/cormorant-700.woff2") format("woff2"); }
+  /* ============ Typefaces — self-hosted variable fonts, each file
+     spanning the whole weight range it's used at (no separate static
+     file per weight). No external font request: nothing to
+     flash-of-unstyled-text against, nothing that depends on a
+     third-party CDN being up. font-weight is declared as a range on
+     each @font-face so the browser maps every font-weight value used
+     elsewhere in this sheet onto the file's own variable axis, rather
+     than snapping to a single baked-in instance. ============ */
+  @font-face{ font-family:"Fraunces"; font-weight:500 700; font-style:normal; font-display:swap;
+    font-optical-sizing:auto;
+    src:url("../fonts/fraunces/fraunces-variable.woff2") format("woff2"); }
+  @font-face{ font-family:"Fraunces"; font-weight:500; font-style:italic; font-display:swap;
+    font-optical-sizing:auto;
+    src:url("../fonts/fraunces/fraunces-italic-500.woff2") format("woff2"); }
+  @font-face{ font-family:"Public Sans"; font-weight:400 800; font-style:normal; font-display:swap;
+    src:url("../fonts/public-sans/public-sans-variable.woff2") format("woff2"); }
 
   /* ============ Nile Editorial — design tokens ============ */
   :root{
@@ -49,8 +45,8 @@
     --teal:      #1B6E86;
     --teal-deep: #123F4D;
 
-    --display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
-    --body: "Manrope", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --display: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --body: "Public Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
 
     /* Fluid scale solved properly (linear interpolation 375px→1440px against
        the exact px ranges in DESIGN_SYSTEM.md), not eyeballed clamp() guesses. */
@@ -139,7 +135,12 @@
     background:rgba(246,241,232,0.96);
     border-bottom:1px solid var(--stone);
   }
+  /* While the full-screen mobile menu is open, force the header to the
+     true viewport top instead of its normal sticky (scroll-dependent)
+     position — see the comment in main.js's openMenu(). */
+  body.menu-open header.site{ position:fixed; top:0; left:0; right:0; }
   .header-row{
+    position:relative; z-index:39; background:rgba(246,241,232,0.98);
     display:flex; align-items:center; justify-content:space-between;
     height:68px; transition:height 260ms var(--ease-ui);
   }
@@ -169,6 +170,8 @@
   .btn-primary-ivory:hover{ background:var(--white); }
   .btn-ghost{ background:transparent; color:var(--navy); border-color:var(--stone); }
   .btn-ghost:hover{ border-color:var(--gold); }
+  .btn-ghost-on-photo{ background:transparent; color:var(--white); border-color:rgba(246,241,232,0.55); }
+  .btn-ghost-on-photo:hover{ border-color:var(--gold); background:rgba(246,241,232,0.08); }
   .btn-sm{ min-height:44px; padding:0 16px; font-size:0.86rem; }
   .btn:active{ transform:translateY(1px); }
   .btn .arr{ display:inline-flex; transition:transform 280ms var(--ease-out); }
@@ -185,19 +188,67 @@
   .menu-btn[aria-expanded="true"] span:nth-child(2){ opacity:0; }
   .menu-btn[aria-expanded="true"] span:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
 
+  /* ---------- Mobile menu — full-screen numbered takeover ----------
+     Replaces the earlier slide-down list. Positioned as a fixed overlay
+     under the header (header.site keeps z-index:40, this sits at 38) so
+     the wordmark and the hamburger-to-× toggle stay visible and usable
+     the whole time the menu is open — no separate close button or brand
+     mark needed inside the panel itself. Each link is numbered with the
+     same chapter-numeral device used for section heads elsewhere on the
+     site, in the new display face, so the menu reads as part of the same
+     system rather than a generic overlay bolted on. Opacity/visibility
+     transition, not display:none, so the stagger-in below can animate;
+     visibility's own transition is delayed on the way in and instant on
+     the way out, so a closed menu is never sitting invisibly on top of
+     the page intercepting taps. */
   .mobile-menu{
-    max-height:0; overflow:hidden; background:var(--ivory);
-    border-bottom:1px solid var(--stone);
-    transition:max-height 320ms ease;
+    position:fixed; inset:0; z-index:38; background:var(--navy);
+    display:flex; flex-direction:column;
+    padding:calc(68px + 28px) var(--gutter) calc(22px + env(safe-area-inset-bottom));
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity 260ms var(--ease-ui), visibility 0s linear 260ms;
   }
-  .mobile-menu.open{ max-height:520px; }
-  .mobile-menu ul{ list-style:none; margin:0; padding:8px var(--gutter) 20px; }
-  .mobile-menu li + li{ border-top:1px solid var(--stone); }
+  .mobile-menu.open{
+    opacity:1; visibility:visible; pointer-events:auto;
+    transition:opacity 260ms var(--ease-ui), visibility 0s linear 0s;
+  }
+  .mobile-menu ul{ list-style:none; margin:0; padding:0; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .mobile-menu li{ border-bottom:1px solid rgba(246,241,232,0.14); }
+  .mobile-menu li:first-child{ border-top:1px solid rgba(246,241,232,0.14); }
   .mobile-menu a{
-    display:block; padding:14px 4px; text-decoration:none; color:var(--ink);
-    font-family:var(--display); font-size:1.3rem; font-weight:600;
+    display:flex; align-items:baseline; gap:14px; padding:15px 2px;
+    text-decoration:none; color:var(--white);
+    font-family:var(--display); font-size:1.5rem; font-weight:600;
+    opacity:0; transform:translateY(10px);
+    transition:opacity 300ms var(--ease-out), transform 300ms var(--ease-out);
   }
-  .mobile-menu .social-row{ display:flex; gap:16px; padding:16px 4px 4px; font-size:var(--fs-cap); color:var(--slate); }
+  /* Closing is instant (no stagger, no delay) — opening can feel
+     considered, closing should feel immediate. The transition-delay
+     below only ever applies while .open is present. */
+  .mobile-menu:not(.open) a{ transition-duration:0ms; transition-delay:0ms; }
+  .mobile-menu.open a{ opacity:1; transform:translateY(0); }
+  .mobile-menu.open li:nth-child(1) a{ transition-delay:30ms; }
+  .mobile-menu.open li:nth-child(2) a{ transition-delay:60ms; }
+  .mobile-menu.open li:nth-child(3) a{ transition-delay:90ms; }
+  .mobile-menu.open li:nth-child(4) a{ transition-delay:120ms; }
+  .mobile-menu.open li:nth-child(5) a{ transition-delay:150ms; }
+  .mobile-menu.open li:nth-child(6) a{ transition-delay:180ms; }
+  .mobile-menu.open li:nth-child(7) a{ transition-delay:210ms; }
+  .mobile-menu.open li:nth-child(8) a{ transition-delay:240ms; }
+  .mobile-menu.open li:nth-child(9) a{ transition-delay:270ms; }
+  .mobile-menu .mm-num{
+    flex:none; font-family:var(--display); font-weight:600; color:var(--gold);
+    font-size:0.8rem; font-variant-numeric:tabular-nums; letter-spacing:0.02em;
+  }
+  .mobile-menu a[aria-current="page"] .mm-num{ color:var(--white); }
+  .mobile-menu a[aria-current="page"] .mm-label{ color:var(--gold); }
+  .mobile-menu .social-row{
+    flex:none; margin-top:auto; padding-top:20px; display:flex; gap:16px;
+    font-size:var(--fs-cap); color:var(--stone);
+  }
+  @media (prefers-reduced-motion: reduce){
+    .mobile-menu a{ transition:opacity 1ms linear; transform:none; }
+  }
 
   nav.desktop-nav{ display:none; }
   @media (min-width:860px){
@@ -225,16 +276,35 @@
   .band-navy{ background:var(--navy); color:var(--ivory); }
   .band-navy .slate-on-navy{ color:#AEB9C4; }
 
-  /* ============ Hero ============ */
-  .hero{ padding-top:44px; padding-bottom:0; }
-  .hero-grid{ display:grid; gap:34px; }
-  .hero-copy{ order:2; }
-  .hero-media{ order:1; }
-  .hero h1{ font-size:var(--fs-hero); line-height:0.98; margin:14px 0 20px; color:var(--navy); }
+  /* ============ Hero — v6, full-bleed background photo ============
+     Replaces the earlier boxed two-column hero (copy beside a framed
+     portrait) with the photo filling the whole section and the copy
+     sitting on a navy gradient scrim over it. A different crop loads per
+     breakpoint (see the background-image swap below) rather than one
+     file stretched everywhere: the mobile file is near its native
+     resolution, the desktop one is deliberately wider so it can carry a
+     lower, wider crop without the subject running off top/bottom. */
+  .hero{
+    position:relative; padding:0; overflow:hidden; isolation:isolate;
+    min-height:min(88vh, 880px); min-height:min(88dvh, 880px);
+    display:flex; align-items:flex-end;
+    background-color:var(--navy);
+    background-image:url("../img/press/hero-founder-mobile.webp");
+    background-size:cover; background-position:50% 14%;
+  }
+  .hero-scrim{
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:linear-gradient(180deg, rgba(16,42,67,0.24) 0%, rgba(16,42,67,0.48) 52%, rgba(16,42,67,0.92) 100%);
+  }
+  .hero .frame-cover{ z-index:2; }
+  .hero-copy{ position:relative; z-index:3; width:100%; padding-block:64px 40px; }
+  .hero .eyebrow{ color:var(--stone); text-shadow:0 1px 6px rgba(16,42,67,0.55); }
+  .hero h1{ font-size:var(--fs-hero); line-height:0.98; margin:14px 0 20px; color:var(--white); }
   .hero h1 .line{ display:block; overflow:hidden; }
   .hero h1 .line-inner{ display:block; }
-  .hero .lead{ font-size:var(--fs-lead); line-height:1.5; color:var(--ink); max-width:52ch; }
+  .hero .lead{ font-size:var(--fs-lead); line-height:1.5; color:#E7DFCF; max-width:52ch; }
   .hero-actions{ display:flex; flex-wrap:wrap; gap:14px; margin-top:30px; }
+  .hero .ref-chip{ z-index:3; }
   .media-frame{
     position:relative; width:100%; aspect-ratio:4/5; overflow:hidden;
     border-radius:var(--radius); background:var(--stone);
@@ -254,16 +324,25 @@
     color:var(--white); font-size:0.68rem; letter-spacing:0.03em; font-weight:600;
     padding:6px 10px; border-radius:2px; backdrop-filter:blur(2px);
   }
-  @media (min-width:860px){
-    .hero-grid{ grid-template-columns:0.92fr 1.08fr; align-items:center; gap:64px; }
-    .hero-copy{ order:1; } .hero-media{ order:2; }
-    .media-frame{ aspect-ratio:4/5; max-height:640px; }
+  /* Below 860px the mobile sticky CTA bar overlays the bottom ~66px of
+     the viewport (see body.has-mobile-cta below) — a flex/min-height hero
+     whose content hugs its own bottom edge can end up visually behind it
+     regardless of exactly how tall the header+banner above happen to be,
+     so this reserves the same buffer directly on the hero rather than
+     trying to predict it via vh arithmetic. */
+  @media (max-width:859px){
+    .hero{ padding-bottom:calc(72px + env(safe-area-inset-bottom)); }
   }
-  /* A wider container (see --maxw above) leaves the hero portrait looking
-     small and adrift on a large monitor if its own cap doesn't grow with
-     it — so it grows too, proportionally, instead of stopping at the
-     laptop-tuned 640px forever. */
-  @media (min-width:1440px){ .hero-media .media-frame{ max-height:760px; } }
+  @media (min-width:860px){
+    .hero{ background-image:url("../img/press/hero-founder-desktop.webp"); background-position:68% 24%; }
+    .hero-copy{ max-width:640px; padding-block:0; }
+    .media-frame{ max-height:640px; }
+  }
+  /* A wider container (see --maxw above) leaves a boxed portrait elsewhere
+     on the page (Leadership, About) looking small and adrift on a large
+     monitor if its own cap doesn't grow with it — so it grows too,
+     proportionally, instead of stopping at the laptop-tuned 640px forever. */
+  @media (min-width:1440px){ .leader-media .media-frame, .profile-media .media-frame{ max-height:760px; } }
 
   /* ============ Trust line ============ */
   .trust{
@@ -591,7 +670,7 @@
   }
   .map-marker:hover, .map-marker:focus-visible, .map-marker.is-active{ fill:var(--white); }
   .map-marker-label{
-    fill:var(--ivory); font-size:11px; font-family:"Manrope",sans-serif; font-weight:700;
+    fill:var(--ivory); font-size:11px; font-family:var(--body); font-weight:700;
     pointer-events:none;
   }
   .map-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px; background:var(--stone); border:1px solid var(--stone); }
@@ -753,7 +832,9 @@
     :root{ --gutter:18px; }
     section{ padding-block:56px; }
     section.tight{ padding-block:44px; }
-    .hero{ padding-top:28px; }
+    .concept-strip{ font-size:0.7rem; line-height:1.4; padding:8px 18px; }
+    .hero{ min-height:60vh; min-height:60dvh; }
+    .hero-copy{ padding-block:36px 28px; }
     .page-hero{ padding-bottom:36px; }
     .wordmark{ font-size:1.18rem; }
     .btn{ min-height:50px; }
@@ -762,6 +843,31 @@
     .quote{ font-size:1.28rem; }
     .story-article p:first-of-type::first-letter{ font-size:3.4rem; padding:4px 8px 0 0; }
     .principle-grid, .program-grid, .pillar-grid, .evidence-grid{ grid-template-columns:1fr !important; }
+  }
+  /* Short phones (iPhone SE-class and similar, ~740px tall or less): the
+     hero's own min-height is only a floor — on a narrow, short screen the
+     two-line headline's forced wraps can push actual content height well
+     past it, past a full screen's worth, so the CTAs land partway into
+     the band the fixed mobile bar covers even with the buffer above.
+     Trimming the headline size and tightening the vertical rhythm here
+     keeps the whole hero, buttons included, inside one short screen.
+     Height-gated only — a narrow-but-tall phone keeps the full-size
+     headline above; this is specifically about vertical room. */
+  @media (max-height:760px) and (max-width:600px){
+    .hero h1{ font-size:clamp(2.1rem, 1.7rem + 3.4vw, 2.8rem); margin:8px 0 12px; }
+    .hero .lead{ font-size:0.95rem; }
+    .hero-actions{ margin-top:14px; }
+    .hero-copy{ padding-block:20px 16px; }
+  }
+  /* Very short phones (iPhone SE 1st-gen class, ≤600px tall): one more
+     notch down on the same headline/lead/action rhythm. */
+  @media (max-height:600px) and (max-width:600px){
+    .hero h1{ font-size:clamp(1.7rem, 1.4rem + 3vw, 2.2rem); margin:6px 0 10px; }
+    .hero .lead{ display:none; }
+    .hero-actions{ margin-top:10px; gap:10px; }
+    .hero-actions .btn{ min-height:44px; padding:0 16px; font-size:0.86rem; }
+    .hero-copy{ padding-block:14px 12px; }
+    .hero .eyebrow{ font-size:0.7rem; }
   }
   @supports (padding: max(0px)){
     .wrap, .story-hero-cap, .story-head, .story-article, .story-footer-links{
@@ -1061,28 +1167,15 @@
     .edit-row .edit-idx{ font-size:1.7rem; }
   }
 
-  /* ---------- Hero: wide-desktop editorial rail ----------
-     A rotated micro-label + hairline along the portrait's edge, plus a
-     slightly more asymmetric column split and a small upward offset on
-     the frame — an "editorial composition" cue rather than a centred
-     50/50 split. Gated to ≥1040px only: Home's tested hero layout below
-     that width is untouched, so nothing here carries mobile/tablet risk.
-     Base rule is display:none — without it, a browser applies its
-     default display:block to this bare <div> below 1040px, which would
-     show the rotated label as plain unstyled block content above the
-     portrait instead of hiding it. */
-  .hero-rail{ display:none; }
+  /* ---------- Hero: wide-desktop refinement ----------
+     Gated to ≥1040px only, same discipline as the rest of the site's
+     wide-desktop-only touches: a small gold rule beside the eyebrow
+     (the "editorial issue number" language used everywhere else on the
+     page, applied to the one section that predates the chapter-numeral
+     system) and a touch more room for the headline now that the photo
+     behind it has more width to give. */
   @media (min-width:1040px){
-    .hero-grid{ grid-template-columns:0.74fr 1.26fr; gap:60px; }
-    .hero-media{ position:relative; margin-top:-30px; }
-    .hero-rail{
-      display:flex; align-items:center; gap:12px;
-      position:absolute; left:-52px; top:50%; width:200px;
-      transform:translateY(-50%) rotate(-90deg); transform-origin:left center;
-    }
-    .hero-rail .rail-rule{ width:34px; height:1px; background:var(--stone); flex:none; }
-    .hero-rail .rail-text{
-      font-size:var(--fs-eyebrow); font-weight:700; letter-spacing:0.16em;
-      text-transform:uppercase; color:var(--slate); white-space:nowrap;
-    }
+    .hero-copy{ max-width:720px; }
+    .hero .eyebrow{ display:flex; align-items:center; gap:12px; }
+    .hero .eyebrow::before{ content:""; width:34px; height:1px; background:var(--gold); flex:none; }
   }
